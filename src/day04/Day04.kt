@@ -3,6 +3,7 @@ package day04
 import readInput
 import readTestInput
 
+fun parseNumbers(input: List<String>) = input.first().split(",").map { it.toInt() }
 fun parseBoards(input: List<String>): List<Board> =
     input.drop(1)
         .filter(String::isNotEmpty)
@@ -13,89 +14,32 @@ data class Square(val value: Int, var marked: Boolean)
 typealias Board = List<List<Square>>
 
 fun Board.unmarked() = flatMap { it.filterNot(Square::marked) }.map(Square::value)
+fun Board.mark(n: Int) = onEach { row -> row.onEach { sq -> if (sq.value == n) sq.marked = true } }
+fun Board.rows() = this
+fun Board.columns() = (0 until 5).map { j -> rows().map { row -> row[j] } }
+fun Board.completeRows() = rows().filter { it.map(Square::marked).reduce(Boolean::and) }
+fun Board.completeColumns() = columns().filter { it.map(Square::marked).reduce(Boolean::and) }
+fun Board.won() = (completeRows() + completeColumns()).isNotEmpty()
 
-fun putNumber(board: Board, n: Int): Int? {
-    for (i in 0 until 5) {
-        for (j in 0 until 5) {
-            val x = board[i][j]
-            if (x.value == n) {
-                x.marked = true
+data class Game(val boards: List<Board>, val numbers: List<Int>)
 
-                // check row
-                val row = board[i].map { it.marked }.reduce(Boolean::and)
-                if (row) return n * board.unmarked().sum()
+val Game.firstWinner: Int
+    get() = numbers.asSequence()
+        .map { n -> n * (boards.asSequence().filterNot(Board::won).map { b -> b.mark(n) }.firstOrNull(Board::won)?.unmarked()?.sum() ?: 0) }
+        .filter { it > 0 }
+        .first()
 
-                // check column
-                val column =
-                    board.map { it.filterIndexed { index, _ -> index == j }.first() }
-                        .map { it.marked }.reduce(Boolean::and)
-
-                if (column) return n * board.unmarked().sum()
-            }
-        }
-    }
-
-    return null
-}
+val Game.lastWinner: Int
+    get() = numbers.asSequence()
+        .map { n -> n * (boards.asSequence().filterNot(Board::won).map { b -> b.mark(n) }.lastOrNull(Board::won)?.unmarked()?.sum() ?: 0) }
+        .filter { it > 0 }
+        .last()
 
 fun main() {
-    fun part1(input: List<String>): Int {
-        val numbers = input.first().split(",").map { it.toInt() }
-        val boards = parseBoards(input)
 
-        for (n in numbers) {
-            for (board in boards) {
-                for (i in 0..4) {
-                    for (j in 0..4) {
-                        val x = board[i][j]
-                        if (x.value == n) {
-                            x.marked = true
+    fun part1(input: List<String>): Int = Game(parseBoards(input), parseNumbers(input)).firstWinner
 
-                            // check row
-                            val row = board[i].map { it.marked }.reduce(Boolean::and)
-                            if (row) return n * board.unmarked().sum()
-
-                            // check column
-                            val column =
-                                board.map { it.filterIndexed { index, _ -> index == j }.first() }
-                                    .map { it.marked }.reduce(Boolean::and)
-
-                            if (column) return n * board.unmarked().sum()
-                        }
-                    }
-                }
-            }
-        }
-
-        throw IllegalStateException()
-    }
-
-    fun part2(input: List<String>): Int {
-        data class Player(val board: Board, var playing: Boolean)
-
-        val numbers = input.first().split(",").map { it.toInt() }
-        val boards = parseBoards(input).toMutableList()
-        val boardsTotal = boards.size
-
-        val players = boards.map { Player(it, true) }
-
-        var winsCounter = 0
-        for (n in numbers) {
-            players.filter { it.playing }.forEach { player ->
-                val winningResult = putNumber(player.board, n)
-                if (winningResult != null) {
-                    player.playing = false
-                    winsCounter++
-
-                    if (winsCounter == boardsTotal) return winningResult
-                }
-            }
-        }
-
-        throw IllegalStateException()
-    }
-
-    // 12978
+    fun part2(input: List<String>): Int = Game(parseBoards(input), parseNumbers(input)).lastWinner
 
     // test if implementation meets criteria from the description, like:
     val testInput = readTestInput("Day04")
