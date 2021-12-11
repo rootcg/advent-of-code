@@ -13,7 +13,6 @@ val symbols: List<Symbol> = listOf(
 )
 
 fun Char.isOpeningSymbol() = symbols.any { it.open == this }
-fun Char.isClosingSymbol() = symbols.any { it.close == this }
 fun Char.lintPoints() = symbols.first { it.close == this }.lintPoints
 fun Char.autocompletePoints() = symbols.first { it.close == this }.autocompletePoints
 fun Char.isClosedBy(c: Char) = c == symbols.first { it.open == this }.close
