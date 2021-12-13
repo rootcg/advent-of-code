@@ -49,10 +49,7 @@ class ElfPaper(private val holes: Set<Hole>) : Foldable<ElfPaper> {
     override fun foldUp(position: Int): ElfPaper =
         ElfPaper(
             holes.filter { (_, y) -> y > position }
-                .groupBy { (_, y) -> y }
-                .toSortedMap()
-                .values
-                .flatMap { holes -> holes.map { hole -> hole.copy(y = hole.y - (hole.y - position) * 2) } }
+                .map { hole -> hole.copy(y = hole.y - (hole.y - position) * 2) }
                 .toSet()
                 .plus(holes.filter { (_, y) -> y < position })
         )
