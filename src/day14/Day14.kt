@@ -29,11 +29,11 @@ fun main() {
         val rules = input.drop(2).map { it.split(" -> ") }
             .associate { (pair, element) -> Pair(pair, Pair(element[0], listOf(pair[0] + element, element + pair[1]))) }
 
-        var pairCounters: MutableMap<String, Long> =
+        var pairCounters: Map<String, Long> =
             polymer.zipWithNext()
                 .map { (a, b) -> "$a$b" }
                 .groupingBy { it }
-                .foldTo(mutableMapOf(), 0) { acc, _ -> acc + 1 }
+                .fold(0) { acc, _ -> acc + 1 }
 
         val elementCounters: MutableMap<Char, Long> =
             polymer.toCharArray().groupBy { it }.mapValuesTo(mutableMapOf()) { (_, v) -> v.size.toLong() }
