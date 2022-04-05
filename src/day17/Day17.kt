@@ -42,25 +42,27 @@ fun probeTrajectory(velocity: Velocity, position: Point) =
     generateSequence(Pair(position, velocity)) { (p, v) -> Pair(p.move(v), v.drag().gravity()) }
 
 fun xVelocitiesCandidates(startTarget: Int, endTarget: Int) =
-    IntRange(generateSequence(1, Int::inc).first { nthTriangle(it) >= startTarget }, endTarget)
+    IntRange(generateSequence(1, Int::inc).first { nthTriangle(it) >= startTarget }, endTarget).toList()
 
-fun yVelocitiesCandidates(target: Area, xVelocity: Int, position: Point) =
-    target.ys.first.rangeTo(target.height * 20).filter { reachTarget(Velocity(xVelocity, it), target, position) }
+fun yVelocitiesCandidates(target: Area) =
+    target.ys.first.rangeTo(target.height * 20).toList()
+
+fun <L, R, W> cartesianProduct(xs: List<L>, ys: List<R>, transform: (x: L, y: R) -> W): List<W> =
+    xs.flatMap { x -> ys.map { y -> transform(x, y) } }
 
 fun main() {
 
     fun part1(input: List<String>): Int {
         val target = Area.of(input[0])
         val xVelocityCandidates = xVelocitiesCandidates(target.xs.first, target.xs.last)
-        val validVelocities = xVelocityCandidates.map { x -> yVelocitiesCandidates(target, x, Point(0, 0)).map { y -> Velocity(x, y) } }.filter { it.isNotEmpty() }.flatten()
-
+        val validVelocities = cartesianProduct(xVelocityCandidates, yVelocitiesCandidates(target), ::Velocity).filter { reachTarget(it, target, Point(0, 0)) }
         return validVelocities.map { it.y }.maxOf { it }.let { nthTriangle(it) }
     }
 
     fun part2(input: List<String>): Int {
         val target = Area.of(input[0])
         val xVelocityCandidates = xVelocitiesCandidates(target.xs.first, target.xs.last)
-        val validVelocities = xVelocityCandidates.map { x -> yVelocitiesCandidates(target, x, Point(0, 0)).map { y -> Velocity(x, y) } }.filter { it.isNotEmpty() }.flatten()
+        val validVelocities = cartesianProduct(xVelocityCandidates, yVelocitiesCandidates(target), ::Velocity).filter { reachTarget(it, target, Point(0, 0)) }
         return validVelocities.size
     }
 
