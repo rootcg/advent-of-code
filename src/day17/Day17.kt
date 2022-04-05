@@ -16,7 +16,6 @@ data class Point(val x: Int, val y: Int) {
 data class Area(val xs: IntRange, val ys: IntRange) {
 
     val height: Int = (ys.first.absoluteValue - ys.last.absoluteValue).absoluteValue
-    val width: Int = (xs.first.absoluteValue - xs.last.absoluteValue).absoluteValue
 
     companion object {
         private val regex = Regex("""[xy]=(-?\d*)..(-?\d*)""")
@@ -34,8 +33,6 @@ data class Area(val xs: IntRange, val ys: IntRange) {
 
 fun nthTriangle(n: Int): Int = 0.rangeTo(n).sum()
 
-fun minNthTriangle(limit: Int) = generateSequence(1, Int::inc).first { nthTriangle(it) >= limit }
-
 fun reachTarget(velocity: Velocity, target: Area, position: Point): Boolean =
     probeTrajectory(velocity, position)
         .takeWhile { (p, _) -> p.x <= target.xs.last && p.y >= target.ys.first }
@@ -44,33 +41,35 @@ fun reachTarget(velocity: Velocity, target: Area, position: Point): Boolean =
 fun probeTrajectory(velocity: Velocity, position: Point) =
     generateSequence(Pair(position, velocity)) { (p, v) -> Pair(p.move(v), v.drag().gravity()) }
 
-fun validForwardVelocities(startTarget: Int, endTarget: Int) =
-    IntRange(
-        generateSequence(1, Int::inc).first { nthTriangle(it) >= startTarget },
-        generateSequence(1, Int::inc).first { nthTriangle(it) > endTarget }.minus(1)
-    )
+fun xVelocitiesCandidates(startTarget: Int, endTarget: Int) =
+    IntRange(generateSequence(1, Int::inc).first { nthTriangle(it) >= startTarget }, endTarget)
 
-fun maxUpVelocity(x: Int, target: Area, position: Point) =
-    1.rangeTo(target.height * 100).last { reachTarget(Velocity(x, it), target, position) }
+fun yVelocitiesCandidates(target: Area, xVelocity: Int, position: Point) =
+    target.ys.first.rangeTo(target.height * 20).filter { reachTarget(Velocity(xVelocity, it), target, position) }
 
 fun main() {
 
     fun part1(input: List<String>): Int {
         val target = Area.of(input[0])
-        val xVelocityCandidates = validForwardVelocities(target.xs.first, target.xs.last)
-        val validVelocities = xVelocityCandidates.map { Velocity(it, maxUpVelocity(it, target, Point(0, 0))) }
+        val xVelocityCandidates = xVelocitiesCandidates(target.xs.first, target.xs.last)
+        val validVelocities = xVelocityCandidates.map { x -> yVelocitiesCandidates(target, x, Point(0, 0)).map { y -> Velocity(x, y) } }.filter { it.isNotEmpty() }.flatten()
 
-        return validVelocities.map { nthTriangle(it.y) }.maxOf { it }
+        return validVelocities.map { it.y }.maxOf { it }.let { nthTriangle(it) }
     }
 
-    fun part2(input: List<String>): Int = 0
+    fun part2(input: List<String>): Int {
+        val target = Area.of(input[0])
+        val xVelocityCandidates = xVelocitiesCandidates(target.xs.first, target.xs.last)
+        val validVelocities = xVelocityCandidates.map { x -> yVelocitiesCandidates(target, x, Point(0, 0)).map { y -> Velocity(x, y) } }.filter { it.isNotEmpty() }.flatten()
+        return validVelocities.size
+    }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readTestInput("Day17")
     println("PART ONE TEST: ")
     check(part1(testInput) == 45)
     println("PART TWO TEST: ")
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 112)
 
     val input = readInput("Day17")
     println("PART ONE: ")
