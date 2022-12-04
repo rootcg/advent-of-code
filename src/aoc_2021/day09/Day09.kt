@@ -53,11 +53,11 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readTestInput("Day09")
+    val testInput = readTestInput("2021", "Day09")
     check(part1(testInput) == 15)
     check(part2(testInput) == 1134)
 
-    val input = readInput("Day09")
+    val input = readInput("2021", "Day09")
     println(part1(input))
     println(part2(input))
 }

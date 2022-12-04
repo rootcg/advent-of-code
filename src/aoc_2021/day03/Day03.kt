@@ -45,12 +45,12 @@ fun main() {
     fun part2(input: List<String>) = binaryToDecimal(oxygenRating(input)) * binaryToDecimal(co2Rating(input))
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readTestInput("Day03")
+    val testInput = readTestInput("2021", "Day03")
 
     check(part1(testInput) == 198L)
     check(part2(testInput) == 230L)
 
-    val input = readInput("Day03")
+    val input = readInput("2021", "Day03")
     println(part1(input))
     println(part2(input))
 }

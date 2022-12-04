@@ -16,11 +16,11 @@ fun main() {
     fun part2(input: List<String>): Long = parseInput(input).map { 256 + (8 - it) }.sumOf { FamilyCounter(it) }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readTestInput("Day06")
+    val testInput = readTestInput("2021", "Day06")
     check(part1(testInput) == 5934L)
     check(part2(testInput) == 26984457539L)
 
-    val input = readInput("Day06")
+    val input = readInput("2021", "Day06")
     println(part1(input))
     println(part2(input))
 }

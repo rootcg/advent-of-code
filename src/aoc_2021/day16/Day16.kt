@@ -129,7 +129,7 @@ fun main() {
     fun part2(input: List<String>): Unit = input.forEach { println(Packets.fromHex(it).first().value()) }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readTestInput("Day16")
+    val testInput = readTestInput("2021", "Day16")
     println("TEST PART ONE: ")
     part1(testInput)
     println("TEST PART TWO: ")
@@ -137,7 +137,7 @@ fun main() {
 
     println()
 
-    val input = readInput("Day16")
+    val input = readInput("2021", "Day16")
     println("PART ONE: ")
     part1(input)
     println("PART TWO: ")
